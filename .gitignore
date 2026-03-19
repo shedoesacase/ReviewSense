@@ -25,3 +25,6 @@ Thumbs.db
 *.env
 config.ini
 output/
+artifacts/*.txt
+artifacts/*.png
+artifacts/*.pkl
