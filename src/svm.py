@@ -30,10 +30,11 @@ X_train, x_val, y_train, y_val = train_test_split(
 )
 
 vectorizer = TfidfVectorizer(
-    max_features=5000,
+    max_features=20000,
     min_df=5,
-    max_df=0.8,
-    ngram_range=(1, 2)
+    max_df=0.85,
+    ngram_range=(1, 2),
+    sublinear_tf=True
 )
 
 X_train_tfidf = vectorizer.fit_transform(X_train['text'])
@@ -43,11 +44,11 @@ X_test_tfidf = vectorizer.transform(x_test['text'])
 joblib.dump(vectorizer, "../artifacts/tfidf_vectorizer_linear_svm.pkl")
 
 model = LinearSVC(
-    C=1.0,
-    class_weight='balanced',
-    random_state=42,
-    max_iter=10000
-)
+        C=0.04,
+        class_weight='balanced',
+        max_iter=20000,
+        random_state=42
+    )
 
 start_time = time.time()
 
