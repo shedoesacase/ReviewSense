@@ -29,3 +29,4 @@ artifacts/
 results/
 tokenized_dataset/
 catboost_info/
+src/test.py

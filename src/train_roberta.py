@@ -1,12 +1,6 @@
-import pandas as pd
-import matplotlib.pyplot as plt
 import numpy as np
-import re
-from datasets import Dataset, ClassLabel, load_from_disk
-import os
-from transformers import TrainingArguments, DataCollatorWithPadding, Trainer, AutoTokenizer
-from transformers import AutoConfig, AutoModelForSequenceClassification
-import torch
+from datasets import load_from_disk
+from transformers import TrainingArguments, DataCollatorWithPadding, Trainer, AutoTokenizer, AutoConfig, AutoModelForSequenceClassification
 from sklearn.metrics import f1_score, accuracy_score
 
 def modelLoad():

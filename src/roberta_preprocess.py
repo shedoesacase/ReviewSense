@@ -1,27 +1,11 @@
 import pandas as pd
-import matplotlib.pyplot as plt
-import numpy as np
 import re
 from datasets import Dataset, ClassLabel
-import os
 from transformers import AutoTokenizer
 
-#../data/All_Beauty.jsonl
 
-# OUTPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "output")
-# os.makedirs(OUTPUT_DIR, exist_ok=True)
-
-# def save_to_log(message, filename="stats.txt"):
-#     log_path = os.path.join(OUTPUT_DIR, filename)
-#     with open(log_path, "a", encoding="utf-8") as f:
-#         f.write(str(message) + "\n")
-
-# save_to_log("\n______NEW RUN_______")
-
-def preprocess(dataPath): #удалили пустые строки и повторки, привели все к строковому типу
+def preprocess(dataPath): #удалили пустые строки и повторки, привели все к строковому типу, обернули в лучше воспринимаемый библиотекой тип данных
     originalDf = pd.read_json(dataPath, lines=True)
-    # save_to_log(f"Оригинальное количество строк: {originalDf.shape[0]}")
-
     Rating_Text = originalDf[["rating", "text"]].copy()
     Rating_Text = Rating_Text.dropna()
     Rating_Text.drop_duplicates(keep='first', inplace=True)
