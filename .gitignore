@@ -25,6 +25,7 @@ Thumbs.db
 *.env
 config.ini
 output/
-artifacts/*.txt
-artifacts/*.png
-artifacts/*.pkl
+artifacts/
+results/
+tokenized_dataset/
+catboost_info/

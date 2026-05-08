@@ -1,0 +1,70 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+import re
+from datasets import Dataset, ClassLabel
+import os
+from transformers import AutoTokenizer
+
+#../data/All_Beauty.jsonl
+
+# OUTPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "output")
+# os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+# def save_to_log(message, filename="stats.txt"):
+#     log_path = os.path.join(OUTPUT_DIR, filename)
+#     with open(log_path, "a", encoding="utf-8") as f:
+#         f.write(str(message) + "\n")
+
+# save_to_log("\n______NEW RUN_______")
+
+def preprocess(dataPath): #удалили пустые строки и повторки, привели все к строковому типу
+    originalDf = pd.read_json(dataPath, lines=True)
+    # save_to_log(f"Оригинальное количество строк: {originalDf.shape[0]}")
+
+    Rating_Text = originalDf[["rating", "text"]].copy()
+    Rating_Text = Rating_Text.dropna()
+    Rating_Text.drop_duplicates(keep='first', inplace=True)
+    Rating_Text['rating'] = pd.to_numeric(Rating_Text['rating'], errors='coerce').dropna().astype(int)
+    Rating_Text['rating'] = Rating_Text['rating'] - 1  # Делаем 0-4
+    Rating_Text['text'] = Rating_Text['text'].astype(str).apply(clean_text)
+    counts = Rating_Text['rating'].value_counts()
+    min_size = counts.min()
+    balanced_df = pd.concat([
+        Rating_Text[Rating_Text['rating'] == label].sample(min_size, random_state=42) 
+        for label in Rating_Text['rating'].unique()
+    ])
+    balanced_df = balanced_df.sample(frac=1, random_state=42).reset_index(drop=True)
+    dataset = Dataset.from_pandas(balanced_df)
+    if "__index_level_0__" in dataset.column_names:
+        dataset = dataset.remove_columns(["__index_level_0__"])
+    dataset = dataset.cast_column("rating", ClassLabel(num_classes=5, names=["1","2","3","4","5"]))
+    dataset = dataset.rename_column("rating", "labels")
+
+    return dataset
+
+def trainTestSplit(dataset):
+    return dataset.train_test_split(test_size = 0.2, seed = 42)
+
+def clean_text(text):
+    text = re.sub(r'<.*?>', ' ', text)
+    text = re.sub(r'\s+', ' ', text)
+    return text.strip()
+
+def tokenize(batch):
+    encoded = tokenizer(
+        batch["text"],
+        truncation = True,
+        max_length = 512
+    )
+    return encoded
+
+if __name__ == "__main__":
+    dataPath = "../data/All_Beauty.jsonl"
+    dataset = preprocess(dataPath)
+    dataset = dataset.shuffle(seed=42).select(range(50000))
+    splitted_dataset = trainTestSplit(dataset)
+    tokenizer = AutoTokenizer.from_pretrained("roberta-base")
+    tokenized_dataset = splitted_dataset.map(tokenize, batched=True, batch_size=1000, remove_columns="text")
+    tokenized_dataset.save_to_disk("tokenized_dataset")
+    
