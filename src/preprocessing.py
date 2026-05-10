@@ -4,10 +4,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 import re
 import os
+import glob
 
 #перед запуском еще нужно скачать библиотеку слов python -m spacy download en_core_web_sm но вроде она через requirements установится
 
-INPUT_PATH = "../data/All_Beauty.jsonl"
+DATA_DIR = "../data/"
+
+files = glob.glob(os.path.join(DATA_DIR, "*.jsonl"))
+INPUT_PATH = files[0]
 OUTPUT_DIR = "../output"
 STATS_PATH = os.path.join(OUTPUT_DIR, "stats.txt")
 CSV_PATH = os.path.join(OUTPUT_DIR, "processed_reviews.csv")
@@ -40,9 +44,9 @@ def clean_data(text):
     return text.strip()
 
 #лемматизация и удаление стоп-слов через spacy
-def normalize_text(texts):
+def normalize_text(texts_series):
     results = []
-    for doc in nlp.pipe(texts.tolist(), batch_size=1000, n_process=-1):
+    for doc in nlp.pipe(texts_series.tolist(), batch_size=1000, n_process=-1):
         lemmas = [
             token.lemma_.lower() if token.lemma_ else token.text.lower()
             for token in doc
@@ -50,6 +54,15 @@ def normalize_text(texts):
         ]
         results.append(" ".join(lemmas))
     return results
+
+def normalize_single_text(text):
+    doc = nlp(text)
+    lemmas = [
+        token.lemma_.lower() if token.lemma_ else token.text.lower()
+        for token in doc
+        if not token.is_stop and not token.is_punct and not token.is_space and not token.is_digit and len(token) >= 2
+    ]
+    return " ".join(lemmas)
 
 #создание колонок с длиной текста и фильтрация коротких отзывов
 def make_features(df):
