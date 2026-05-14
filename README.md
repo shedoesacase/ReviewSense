@@ -118,9 +118,9 @@ Transformer-based deep learning model fine-tuned for 5-class sentiment classific
 
 ## Interface Screenshot
 
-```markdown
+
 ![Interface](interface.png)
-```
+
 
 ---
 
